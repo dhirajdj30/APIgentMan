@@ -1,0 +1,50 @@
+name: sample
+variables:
+  base_url: http://localhost:8000
+requests:
+  - name: create-item
+    method: POST
+    url: "{base_url}/items/9"
+    json:
+      name: "Book"
+      price: 10.5
+    assertions:
+      - type: status
+        expect: 200
+
+  - name: get-item
+    method: POST
+    url: "{base_url}/items/290"
+    json:
+      name: "Pen"
+      price: 5.0
+    assertions:
+      - type: status
+        expect: 200
+
+  - name: update-item
+    method: POST
+    url: "{base_url}/items/12"
+    json:
+      name: "Pencil"
+      price: 3.0
+    assertions:
+      - type: status
+        expect: 200
+
+  - name: delete-item
+    method: POST
+    url: "{base_url}/items/43"
+    json:
+      name: "Eraser"
+      price: 2.0
+    assertions:
+      - type: status
+        expect: 200
+
+  - name: get-nonexistent-item
+    method: GET
+    url: "{base_url}/items/99"
+    assertions:
+      - type: status
+        expect: 404
