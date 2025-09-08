@@ -14,8 +14,6 @@ Features implemented in this starter:
 Usage:
     pip install -r requirements.txt
     python main.py --help
-
-This is a starting point — extend with Prometheus, OpenTelemetry, richer AI agenting, self-healing, load testing, mocking, etc.
 """
 
 from __future__ import annotations
@@ -115,7 +113,10 @@ def load_collection(path: str) -> Collection:
 # Assertion helpers
 # -------------------------
 
-def apply_assertions(result_json: Any, resp_headers: Dict[str, Any], status: int, latency_ms: float, assertions: List[Assertion]) -> List[str]:
+def apply_assertions(
+        result_json: Any, 
+        resp_headers: Dict[str, Any], status: int,
+        latency_ms: float, assertions: List[Assertion]) -> List[str]:
     errors: List[str] = []
     for a in assertions:
         if a.type == "status":
@@ -157,7 +158,10 @@ def apply_assertions(result_json: Any, resp_headers: Dict[str, Any], status: int
 # Runner
 # -------------------------
 
-async def run_request(client: httpx.AsyncClient, r: RequestDef, variables: Dict[str, Any]) -> RunResult:
+async def run_request(
+        client: httpx.AsyncClient, 
+        r: RequestDef, 
+        variables: Dict[str, Any]) -> RunResult:
     url = r.url.format(**variables)
     headers = {k: v.format(**variables) for k, v in r.headers.items()}
     params = {k: (v.format(**variables) if isinstance(v, str) else v) for k, v in r.params.items()}
@@ -166,7 +170,12 @@ async def run_request(client: httpx.AsyncClient, r: RequestDef, variables: Dict[
 
     start = time.perf_counter()
     try:
-        resp = await client.request(r.method.upper(), url, headers=headers, params=params, json=json_body, data=data_body, timeout=30.0)
+        resp = await client.request(
+            r.method.upper(), url, 
+            headers=headers, params=params, 
+            json=json_body, data=data_body, 
+            timeout=30.0
+        )
         latency_ms = (time.perf_counter() - start) * 1000.0
         success = resp.status_code < 400
         try:
