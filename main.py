@@ -20,7 +20,6 @@ This is a starting point — extend with Prometheus, OpenTelemetry, richer AI ag
 
 from __future__ import annotations
 import os
-import sys
 import json
 import time
 import math
@@ -34,7 +33,6 @@ import yaml
 from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.table import Table
-from rich import print as rprint
 # -------------------------
 # Globals & Utilities
 # -------------------------
@@ -275,7 +273,9 @@ def percentile(data: List[float], pct: float) -> float:
 # -------------------------
 
 @app.command()
-def run(collection: str = typer.Argument(..., help="Path to collection YAML"), concurrency: int = typer.Option(5, help="Parallel requests"), out: Optional[str] = typer.Option(None, help="Write JSON report to file")):
+def run(collection: str = typer.Argument(..., help="Path to collection YAML"),
+        concurrency: int = typer.Option(5, help="Parallel requests"),
+        out: Optional[str] = typer.Option(None, help="Write JSON report to file")):
     col = load_collection(collection)
     r = asyncio.run(run_collection_async(col, concurrency=concurrency))
     table = Table(title=f"Run Results: {col.name}")
@@ -286,16 +286,28 @@ def run(collection: str = typer.Argument(..., help="Path to collection YAML"), c
     table.add_column("Errors")
 
     for rr in r:
-        table.add_row(rr.request_name, str(rr.status), f"{rr.latency_ms:.2f}", str(rr.success), "; ".join(rr.errors) if rr.errors else "")
+        table.add_row(
+            rr.request_name, str(rr.status),
+            f"{rr.latency_ms:.2f}", str(rr.success),
+            "; ".join(rr.errors) if rr.errors else ""
+        )
     console.print(table)
 
     stats = compute_stats(r)
-    report = {"collection": col.name, "timestamp": time.time(), "results": [rr.model_dump() for rr in r], "stats": stats}
+    report = {
+        "collection": col.name, "timestamp": time.time(),
+        "results": [rr.model_dump() for rr in r], "stats": stats
+    }
 
     history = load_history(DEFAULT_HISTORY_FILE)
     history_entry = {"timestamp": time.time(), "results": []}
     for name, s in stats.items():
-        history_entry["results"].append({"request_name": name, "latency_p95": s["p95"], "p50": s["p50"], "avg": s["avg"], "error_rate": s["error_rate"]})
+        history_entry["results"].append(
+            {"request_name": name, "latency_p95": s["p95"],
+            "p50": s["p50"],
+            "avg": s["avg"],
+            "error_rate": s["error_rate"]}
+        )
     history.setdefault("runs", []).append(history_entry)
     save_history(DEFAULT_HISTORY_FILE, history)
 
@@ -310,7 +322,8 @@ def run(collection: str = typer.Argument(..., help="Path to collection YAML"), c
         console.print(anom["anomalies"])
 
 @app.command()
-def monitor(collection: str = typer.Argument(..., help="Path to collection YAML"), interval: int = typer.Option(60, help="Seconds between runs")):
+def monitor(collection: str = typer.Argument(..., help="Path to collection YAML"),
+            interval: int = typer.Option(60, help="Seconds between runs")):
     col = load_collection(collection)
     console.log(f"Starting monitor for {col.name} every {interval}s. Ctrl-C to stop.")
     try:
@@ -319,9 +332,19 @@ def monitor(collection: str = typer.Argument(..., help="Path to collection YAML"
             stats = compute_stats(r)
             console.log("Run summary:")
             for k,v in stats.items():
-                console.log(f"{k}: p50={v['p50']:.1f}ms p95={v['p95']:.1f}ms avg={v['avg']:.1f}ms errs={v['error_rate']:.2f}")
+                console.log(
+                    f"{k}: p50={v['p50']:.1f}ms p95={v['p95']:.1f}ms avg={v['avg']:.1f}ms errs={v['error_rate']:.2f}")
             history = load_history(DEFAULT_HISTORY_FILE)
-            history.setdefault("runs", []).append({"timestamp": time.time(), "results": [{"request_name": name, "latency_p95": v['p95'], "p50": v['p50'], "avg": v['avg'], "error_rate": v['error_rate']} for name, v in stats.items()]})
+            history.setdefault("runs", []).append(
+                {
+                    "timestamp": time.time(),
+                    "results": [{"request_name": name,
+                    "latency_p95": v['p95'],
+                    "p50": v['p50'],
+                    "avg": v['avg'], 
+                    "error_rate": v['error_rate']} for name, v in stats.items()]
+                }
+            )
             save_history(DEFAULT_HISTORY_FILE, history)
             anom = detect_anomaly(DEFAULT_HISTORY_FILE, r)
             if anom.get("anomalies"):
@@ -332,7 +355,9 @@ def monitor(collection: str = typer.Argument(..., help="Path to collection YAML"
         console.log("Monitor stopped by user")
 
 @app.command()
-def gen_tests(openapi: Optional[str] = typer.Option(None, help="Path or URL to OpenAPI JSON/YAML"), prompt: Optional[str] = typer.Option(None, help="Short description of API")):
+def gen_tests(openapi: Optional[str] = typer.Option(
+    None, help="Path or URL to OpenAPI JSON/YAML"),
+    prompt: Optional[str] = typer.Option(None, help="Short description of API")):
     console.log("Generating tests with LLM...")
     if openapi:
         console.log(f"Parsing OpenAPI at {openapi} (stub implementation)")
