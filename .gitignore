@@ -11,3 +11,4 @@ wheels/
 
 agentic_history.json
 *.env
+*.json

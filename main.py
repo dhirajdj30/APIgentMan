@@ -31,12 +31,14 @@ import yaml
 from pydantic import BaseModel, Field
 from rich.console import Console
 from rich.table import Table
+from dotenv import load_dotenv 
+load_dotenv()  # take environment variables from .env file
+
+from Baner import BANNER
+
 # -------------------------
 # Globals & Utilities
 # -------------------------
-
-# app = typer.Typer(help="Agentic CLI for API testing & monitoring")
-# console = Console()
 
 
 
@@ -45,15 +47,6 @@ app = typer.Typer(help="🤖 APIgentMan – Your Agentic API Tester")
 
 console = Console()
 
-BANNER = r"""
-    █████╗ ██████╗ ██╗ ██████╗ ███████╗███╗   ██╗████████╗
-   ██╔══██╗██╔══██╗██║██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝
-   ███████║██████╔╝██║██║  ███╗█████╗  ██╔██╗ ██║   ██║   
-   ██╔══██║██╔═══╝ ██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   
-   ██║  ██║██║     ██║╚██████╔╝███████╗██║ ╚████║   ██║   
-   ╚═╝  ╚═╝╚═╝     ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   
-           🤖 APIgentMan – Agentic API Tester 📬
-"""
 
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
