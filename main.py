@@ -72,7 +72,7 @@ class RequestDef(BaseModel):
     url: str
     headers: Dict[str, str] = Field(default_factory=dict)
     params: Dict[str, Any] = Field(default_factory=dict)
-    json: Optional[Any] = None
+    json_data: Optional[Any] = None
     data: Optional[Any] = None
     assertions: List[Assertion] = Field(default_factory=list)
 
@@ -158,7 +158,7 @@ async def run_request(
     url = r.url.format(**variables)
     headers = {k: v.format(**variables) for k, v in r.headers.items()}
     params = {k: (v.format(**variables) if isinstance(v, str) else v) for k, v in r.params.items()}
-    json_body = r.json
+    json_body = r.json_data
     data_body = r.data
 
     start = time.perf_counter()
